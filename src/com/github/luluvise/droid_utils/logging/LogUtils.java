@@ -19,10 +19,11 @@ import android.util.Log;
 
 import com.github.luluvise.droid_utils.DroidConfig;
 import com.google.common.annotations.Beta;
+import com.google.common.base.Strings;
 
 /**
  * Helper class containing static utility methods for logging.
- * 
+ *
  * @since 1.0
  * @author Marco Salis
  */
@@ -36,8 +37,10 @@ public class LogUtils {
 	}
 
 	/**
-	 * Logs a message in LogCat, only if application debugging is active.
-	 * 
+	 * Logs a message in LogCat, only if application debugging is active.  Logcat has a message
+	 * length limitation of ~4000 chars, so if the logMessage is > 4000 chars, recursively print
+	 * 4000 characters of the logMessage until all chars are logged.
+	 *
 	 * @param logLevel
 	 *            The log level to use: must be one of the level constants
 	 *            provided by the {@link Log} class.
@@ -45,6 +48,19 @@ public class LogUtils {
 	 * @param logMessage
 	 */
 	public static void log(int logLevel, String logTag, String logMessage) {
+
+		if (!Strings.isNullOrEmpty(logMessage)) {
+			if (logMessage.length() > 4000) {
+				logHelper(logLevel, logTag, logMessage.substring(0, 4000));
+				log(logLevel, logTag, logMessage.substring(4000));
+			} else {
+				logHelper(logLevel, logTag, logMessage);
+			}
+		}
+
+	}
+
+	private static void logHelper(int logLevel, String logTag, String logMessage) {
 		if (DroidConfig.DEBUG) {
 			switch (logLevel) {
 			case Log.ASSERT:
@@ -70,7 +86,7 @@ public class LogUtils {
 	/**
 	 * Prints on LogCat a stack track of an exception, only if application
 	 * debugging is active.
-	 * 
+	 *
 	 * @param t
 	 *            The {@link Throwable} to get the stack trace from
 	 */
@@ -85,7 +101,7 @@ public class LogUtils {
 	/**
 	 * Prints on LogCat a log warning message with the exception stack, only if
 	 * application debugging is active.
-	 * 
+	 *
 	 * @param logTag
 	 * @param logMessage
 	 * @param t
@@ -102,7 +118,7 @@ public class LogUtils {
 	/**
 	 * Prints on LogCat a log warning message with the exception's message
 	 * string, only if application debugging is active.
-	 * 
+	 *
 	 * @param t
 	 *            The {@link Throwable} to get the message from
 	 */
@@ -119,7 +135,7 @@ public class LogUtils {
 	/**
 	 * Prints on LogCat an exception's message string, only if application
 	 * debugging is active.
-	 * 
+	 *
 	 * @deprecated Use {@link #logExceptionMessage(String, String, Throwable)}
 	 *             instead for more accurate logging
 	 * @param t
